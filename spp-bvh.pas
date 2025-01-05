@@ -8,7 +8,7 @@ uses SysUtils,Classes,uVect,uBMP,Math,getopts;
 const 
   eps=1e-4;
   INF=1e20;
-type 
+type
   SphereClass=class
     rad:real;       //radius
     p,e,c:Vec3;// position. emission,color
@@ -105,20 +105,27 @@ begin
   
 end;
 
-function intersect(const r:RayRecord;var t:real; var id:integer):boolean;
+type
+  InterRecord=record
+     isHit:boolean;
+     t:real;
+     id:integer;
+  end;
+
+function intersect(const r:RayRecord):InterRecord;
 var 
   n,d:real;
   i:integer;
 begin
-  t:=INF;
+  result.t:=INF;
   for i:=0 to sph.count-1 do begin
     d:=SphereClass(sph[i]).intersect(r);
-    if d<t then begin
-      t:=d;
-      id:=i;
+    if d<result.t then begin
+      result.t:=d;
+      result.id:=i;
     end;
   end;
-  result:=(t<inf);
+  result.isHit:=(result.t<inf);
 end;
 
 function radiance(const r:RayRecord;depth:integer):Vec3;
@@ -131,13 +138,15 @@ var
   ray2,RefRay:RayRecord;
   nc,nt,nnt,ddn,cos2t,q,a,b,c,R0,Re,RP,Tr,TP:real;
   tDir:Vec3;
+  ir:InterRecord;
 begin
-  id:=0;depth:=depth+1;
-  if intersect(r,t,id)=false then begin
+  ir.id:=0;depth:=depth+1;
+  ir:=intersect(r);
+  if ir.isHit=false then begin
     result:=ZeroVec;exit;
   end;
-  obj:=SphereClass(sph[id]);
-  x:=r.o+r.d*t; n:=(x-obj.p).norm; f:=obj.c;
+  obj:=SphereClass(sph[ir.id]);
+  x:=r.o+r.d*ir.t; n:=(x-obj.p).norm; f:=obj.c;
   if n.dot(r.d)<0 then nl:=n else nl:=n*-1;
   if (f.x>f.y)and(f.x>f.z) then
     p:=f.x
@@ -250,9 +259,11 @@ begin
   Randomize;
   RandomScene;
   
-  camPosition.new(50, 52, 295.6);
-  camDirection.new(0, -0.042612, -1);
-  camDirection:= camDirection.norm;
+  camPosition.new(55, 58, 245.6);
+  camDirection.new(0, -0.24, -1.0).norm;
+//  camPosition.new(50, 52, 295.6);
+//  camDirection.new(0, -0.042612, -1.0).norm;
+
   cam.new(camPosition, camDirection);
 
   cx.new(w * 0.5135 / h, 0, 0);
@@ -288,9 +299,9 @@ begin
             d:= (d +cam.d).norm;
 
    
-            tempRay.o:= d* 140;
-            tempRay.o:= tempRay.o+ cam.o;
+   //         tempRay.o:= d* 140+cam.o;
             tempRay.d := d;
+            tempRay.o := d*70+cam.o;
             temp:=Radiance(tempRay, 0);
             temp:= temp/ samps;
             r:= r+temp;
