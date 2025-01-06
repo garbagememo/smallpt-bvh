@@ -45,11 +45,18 @@ begin
   end;
 end;
 
+type 
+  CamRecord=record
+      p,d:Vec3;
+      PlaneDist:real;
+  end;
+
 var
   sph:TList;
-procedure InitScene;
+function InitScene:CamRecord;
 var
   p,c,e:Vec3;
+  vp,vc,vd:Vec3;
 begin
   sph:=TList.Create;
   sph.add( SphereClass.Create(1e5, p.new( 1e5+1,40.8,81.6),  ZeroVec,            c.new(0.75,0.25,0.25),DIFF) );//Left
@@ -61,14 +68,19 @@ begin
   sph.add( SphereClass.Create(16.5,p.new(27,16.5,47),        ZeroVec,            c.new(1,1,1)*0.999,   SPEC) );//Mirror
   sph.add( SphereClass.Create(16.5,p.new(73,16.5,88),        ZeroVec,            c.new(1,1,1)*0.999,   REFR) );//Glass
   sph.add( SphereClass.Create(600, p.new(50,681.6-0.27,81.6),e.new(12,12,12),    ZeroVec,              DIFF) );//Ligth
+
+  result.p:=vp.new(50, 52, 295.6);
+  result.d:=vd.new(0, -0.042612, -1.0).norm;
+  result.PlaneDist:=170;
 end;
 
-procedure RandomScene;
+function RandomScene:CamRecord;
 var
    Cen,Cen1,Cen2,Cen3:Vec3;
    a,b:integer;
    RandomMatterial:real;
    p,c,e:Vec3;
+   vp,vc,vd:Vec3;
 begin
   sph:=TList.Create;
   Cen.new(50,40.8,-860);
@@ -102,7 +114,9 @@ begin
         end;
      end;
   end;
-  
+  result.p:=vp.new(55, 58, 245.6);
+  result.d:=vd.new(0, -0.24, -1.0).norm;
+  result.PlaneDist:=70;  
 end;
 
 type
@@ -211,7 +225,8 @@ var
   w,h,samps,height    : integer;
   temp,d       : Vec3;
   r1,r2,dx,dy  : real;
-  cam,tempRay  : RayRecord;
+  tempRay  : RayRecord;
+  cam:CamRecord;
   cx,cy: Vec3;
   tColor,r,camPosition,camDirection : Vec3;
 
@@ -257,14 +272,8 @@ begin
   writeln('BMP=OK');
   //  InitScene;
   Randomize;
-  RandomScene;
+  cam:=RandomScene;
   
-  camPosition.new(55, 58, 245.6);
-  camDirection.new(0, -0.24, -1.0).norm;
-//  camPosition.new(50, 52, 295.6);
-//  camDirection.new(0, -0.042612, -1.0).norm;
-
-  cam.new(camPosition, camDirection);
 
   cx.new(w * 0.5135 / h, 0, 0);
   cy:= (cx/ cam.d).norm;
@@ -301,7 +310,7 @@ begin
    
    //         tempRay.o:= d* 140+cam.o;
             tempRay.d := d;
-            tempRay.o := d*70+cam.o;
+            tempRay.o := d*cam.PlaneDist+cam.p;
             temp:=Radiance(tempRay, 0);
             temp:= temp/ samps;
             r:= r+temp;
