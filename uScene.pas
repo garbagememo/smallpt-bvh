@@ -34,8 +34,7 @@ type
 function MargeBoundBox(box0,box1:AABBRecord):AABBRecord;
 function InitScene:CamRecord;
 function RandomScene:CamRecord;
-function testScene:CamRecord;
-function testScene2:CamRecord;
+function SkyScene:CamRecord;
 function intersect(const r:RayRecord):InterRecord;
 var
   sph:TList;
@@ -151,7 +150,7 @@ begin
 
   result.p:=vp.new(50, 52, 295.6);
   result.d:=vd.new(0, -0.042612, -1.0).norm;
-  result.PlaneDist:=170;
+  result.PlaneDist:=140;
 end;
 
 function RandomScene:CamRecord;
@@ -181,7 +180,7 @@ begin
      for b:=-11 to 11 do begin
         RandomMatterial:=random;
         Cen.new( (a+random)*25,5,(b+random)*25);
-        if ( (Cen - Cen1) ).len>25*0.9 then begin
+        if ( (Cen - Cen1) ).len>25*1.0 then begin
            if RandomMatterial<0.8 then begin
               sph.add(SphereClass.Create(5,Cen,ZeroVec,c.new(random,Random,random),DIFF));
            end
@@ -199,79 +198,30 @@ begin
   result.PlaneDist:=70;  
 end;
 
-
-function testScene:CamRecord;
+function SkyScene:CamRecord;
 var
-   Cen,Cen1,Cen2,Cen3:Vec3;
-   a,b:integer;
-   RandomMatterial:real;
-   p,c,e:Vec3;
+   Cen,p,e,c:Vec3;
    vp,vc,vd:Vec3;
 begin
   sph:=TList.Create;
   Cen.new(50,40.8,-860);
 
-  Cen1.new(75,25, 85);
-  Cen2.new(45,25, 30);
-  Cen3.new(15,25,-25);
-  
+  sph.add(SphereClass.Create(1600,      p.new(1,0,2)*3000,   e.new(1,0.9,0.8)*1.2e1*1.56*2,  ZeroVec, DIFF)); // sun
+  sph.add(SphereClass.Create(1560,      p.new(1,0,2)*3500,   e.new(1,0.5,0.05)*4.8e1*1.56*2, ZeroVec,  DIFF) ); // horizon sun2
+  sph.add(SphereClass.Create(10000, Cen+p.new(0,0,-200),     e.new(0.00063842, 0.02001478, 0.28923243)*6e-2*8, c.new(0.7,0.7,1)*0.25,  DIFF)); // sky
 
-  sph.add(SphereClass.Create(10000,  Cen+p.new(0,0,-200)  , e.new(0.6, 0.5, 0.7)*0.8, c.new(0.7,0.9,1.0),  DIFF)); // sky
-  sph.add(SphereClass.Create(100000, p.new(50, -100000, 0), ZeroVec,                  c.new(0.4,0.4,0.4),  DIFF)); // grnd
+  sph.add(SphereClass.Create(100000,    p.new(50, -100000, 0),ZeroVec,c.new(0.3,0.3,0.3),DIFF)); // grnd
+  sph.add(SphereClass.Create(110000,    p.new(50, -110048.5, 0),e.new(0.9,0.5,0.05)*4,ZeroVec,DIFF));// horizon brightener
+  sph.add(SphereClass.Create(4e4,       p.new(50, -4e4-30, -3000),ZeroVec,c.new(0.2,0.2,0.2),DIFF));// mountains
 
-
-  sph.add(SphereClass.Create(25,  Cen1 ,ZeroVec,c.new(0.9,0.9,0.9), SPEC));// Glas
-  sph.add(SphereClass.Create(25,  Cen2 ,ZeroVec,c.new(0.95,0.95,0.95),  REFR)); // Glass
-  sph.add(SphereClass.Create(25,  Cen3 ,ZeroVec,c.new(1,0.6,0.6)*0.696, DIFF));    // 乱反射
+  sph.add(SphereClass.Create(26.5,p.new(22,26.5,42),ZeroVec,c.new(1,1,1)*0.596, SPEC)); // white Mirr
+  sph.add(SphereClass.Create(13,p.new(75,13,82),ZeroVec,c.new(0.96,0.96,0.96)*0.96, REFR));// Glas
+  sph.add(SphereClass.Create(22,p.new(87,22,24),ZeroVec,c.new(0.6,0.6,0.6)*0.696, REFR));    // Glas2
 
   result.p:=vp.new(55, 58, 245.6);
   result.d:=vd.new(0, -0.24, -1.0).norm;
-  result.PlaneDist:=70;  
-end;
-
-function testScene2:CamRecord;
-var
-   Cen,Cen1,Cen2,Cen3:Vec3;
-   a,b:integer;
-   RandomMatterial:real;
-   p,c,e:Vec3;
-   vp,vc,vd:Vec3;
-begin
-  sph:=TList.Create;
-  Cen.new(50,40.8,-860);
-
-  Cen1.new(75,25, 85);
-  Cen2.new(45,25, 30);
-  Cen3.new(15,25,-25);
-  
-
-  sph.add(SphereClass.Create(10000,  Cen+p.new(0,0,-200)  , e.new(0.6, 0.5, 0.7)*0.8, c.new(0.7,0.9,1.0),  DIFF)); // sky
-  sph.add(SphereClass.Create(100000, p.new(50, -100000, 0), ZeroVec,                  c.new(0.4,0.4,0.4),  DIFF)); // grnd
-
-
-  sph.add(SphereClass.Create(25,  Cen1 ,ZeroVec,c.new(0.9,0.9,0.9), SPEC));// Glas
-  sph.add(SphereClass.Create(25,  Cen2 ,ZeroVec,c.new(0.95,0.95,0.95),  REFR)); // Glass
-  sph.add(SphereClass.Create(25,  Cen3 ,ZeroVec,c.new(1,0.6,0.6)*0.696, DIFF));    // 乱反射
-  for a:=-11 to 11 do begin
-     for b:=-11 to 11 do begin
-        RandomMatterial:=random;
-        Cen.new( (a+random)*25,5,(b+random)*25);
-        if ( (Cen - Cen1) ).len>25*1.2 then begin
-           if RandomMatterial<0.8 then begin
-              sph.add(SphereClass.Create(5,Cen,ZeroVec,c.new(random,Random,random),DIFF));
-           end
-           else if RandomMatterial <0.95 then begin
-              sph.add(SphereClass.Create(5,Cen,ZeroVec,c.new(random,Random,random),SPEC));
-           end
-           else begin
-              sph.add(SphereClass.Create(5,Cen,ZeroVec,c.new(random,Random,random),REFR));
-           end;
-        end;
-     end;
-  end;
-  result.p:=vp.new(55, 58, 245.6);
-  result.d:=vd.new(0, -0.24, -1.0).norm;
-  result.PlaneDist:=70;  
+  result.PlaneDist:=70;
+  //PlaneDist=140だと上手く動かない。これは調査すべき点ですなー。
 end;
 
 
