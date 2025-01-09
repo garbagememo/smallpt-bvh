@@ -19,7 +19,6 @@ type
   end;
 
 procedure AABBSort(var a: array of integer);
-procedure AABBSort2(var a: array of integer);
    
 implementation
 
@@ -34,7 +33,8 @@ begin
     end;
   end ;(*case*)
 end;
-procedure AABBSort(var a: array of integer);
+
+procedure AABBSort(var a: array of integer);//バブルソート
 var
    i, j, h,axis: integer;
    ar:real;
@@ -50,57 +50,27 @@ begin
   end;
 end;
 
-procedure AABBSort2(var a: array of integer);
-var
-   i, j, h, n,v,axis: integer;
-   ar,v1,v2:real;
-begin
-   ar:=random;
-   if ar<0.33 then axis:=1 else if ar<0.67 then axis:=2 else axis:=3;
-  n := length(a);
-  h := 1;
-  repeat
-    h := 3*h + 1
-  until h > n;
-  repeat
-    h := h div 3;
-    for i := h to n-1 do begin
-      v := a[i];
-      j := i;
-      while (j >= h) AND (GetAABBVal(a[j-h],axis) > GetAABBVal(a[i],axis)) do begin
-        a[j] := a[j-h];
-        j := j - h;
-      end;
-      a[j] := v;
-    end;(*for*)
-   until h = 1;
-end;
-
 constructor BVHnode.Create(ary:IntegerArray;sph:TList);
 var
    upAry,DownAry:IntegerArray;
    i,len:integer;
 begin
-   (*//debug
-   for i:=0 to High(ary) do begin
-      write('ary[',i,']=',ary[i]);
-   end;
-   writeln;
-   //debug*)
-   root:=sphereclass(sph[ary[0]]).BoundBox;
+   AABBSort(ary);
    Leaf:=Nil_Leaf;
-
+   root:=sphereclass(sph[ary[0]]).BoundBox;
+    
   case High(Ary) of
     0:Leaf:=ary[0];//要素1
     1:begin
        Root:=MargeBoundBox(Root,SphereClass(sph[ary[1] ]).BoundBox);
-       setLength(UpAry,1);SetLength(downAry,1);
-       upAry[0]:=Ary[0];DownAry[0]:=Ary[1];
+       setLength(UpAry,1);
+       SetLength(downAry,1);
+       upAry[0]:=Ary[0];
+       DownAry[0]:=Ary[1];
        Left:=BVHNode.Create(upAry,sph);
        right:=BVHNode.Create(DownAry,sph);
     end;
     else begin
-      AABBSort(ary);
       for i:=1 to high(ary)  do begin
         Root:=MargeBoundBox(Root,SphereClass(sph[ary[i] ]).BoundBox);
       end;

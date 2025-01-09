@@ -140,7 +140,7 @@ begin
   writeln('BMP=OK');
   //  InitScene;
   Randomize;
-  cam:=RandomScene;
+  cam:=testScene2;
  
   
   SetLength(a,sph.count);
