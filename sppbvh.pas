@@ -140,8 +140,8 @@ begin
   writeln('BMP=OK');
   //  InitScene;
   Randomize;
-  cam:=testScene2;
- 
+  cam:=SkyScene;
+  writeln('Set Scene'); 
   
   SetLength(a,sph.count);
   for i:=0 to sph.count-1 do a[i]:=i;
@@ -157,7 +157,7 @@ begin
 (*
   cam.p:=vp.new(55, 58, 245.6);
   cam.d:=vd.new(0, -0.24, -1.0).norm;
-  cam.PlaneDist:=70;  
+  cam.PlaneDist:=140;  
 *)
   
   for y := 0 to h-1 do begin
