@@ -18,7 +18,7 @@ type
     function intersection(r:RayRecord):InterRecord;
   end;
 
-procedure AABBSort(var a: array of integer;axis:integer);
+procedure AABBSort(var a: array of integer);
    
    
    
@@ -35,11 +35,13 @@ begin
     end;
   end ;(*case*)
 end;
-procedure AABBSort(var a: array of integer;axis:integer);
+procedure AABBSort(var a: array of integer);
 var
-   i, j, h, n,v: integer;
-   v1,v2:real;
+   i, j, h, n,v,axis: integer;
+   ar,v1,v2:real;
 begin
+   ar:=random;
+   if ar<0.33 then axis:=1 else if ar<0.67 then axis:=2 else axis:=3;
   n := length(a);
   h := 1;
   repeat
@@ -62,8 +64,7 @@ end;
 constructor BVHnode.Create(ary:IntegerArray;sph:TList);
 var
    upAry,DownAry:IntegerArray;
-   axis,i,len:integer;
-   ar:real;
+   i,len:integer;
 begin
    (*//debug
    for i:=0 to High(ary) do begin
@@ -73,8 +74,6 @@ begin
    //debug*)
    root:=sphereclass(sph[ary[0]]).BoundBox;
    Leaf:=Nil_Leaf;
-   ar:=random;
-   if ar>0.67 then axis:=1 else if ar>0.33 then axis:=2 else axis:=3;
 
   case High(Ary) of
     0:Leaf:=ary[0];//要素1
@@ -86,7 +85,7 @@ begin
        right:=BVHNode.Create(DownAry,sph);
     end;
     else begin
-      AABBSort(ary,axis);
+      AABBSort(ary);
       for i:=1 to high(ary)  do begin
         Root:=MargeBoundBox(Root,SphereClass(sph[ary[i] ]).BoundBox);
       end;
