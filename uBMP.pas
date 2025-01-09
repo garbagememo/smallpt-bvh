@@ -21,6 +21,7 @@ type
       procedure New(x,y:integer);
       procedure SetPixel(x,y:integer;col:rgbColor);
       procedure WriteBMPFile(FN:string);
+      procedure WritePPM(FN:String);
     end;
 implementation
 procedure BMPRecord.new(x,y:longint);
@@ -100,6 +101,23 @@ begin
     Close(b);
 end;
 
+procedure BMPRecord.WritePPM(FN:string);
+var
+   f:text;
+   x,y:integer;
+begin
+   assign(f,FN);rewrite(f);
+   SetTextLineEnding(f,#10);
+   writeln(f, 'P3');
+   writeln(f,bmpWidth,' ',bmpHeight);
+   writeln(f,255);
+   for y:=bmpHeight-1 downto 0 do begin
+      for x:=0 to bmpWidth-1 do begin
+         writeln(f,bmpBody[(y*bmpWidth+x)*3+2],' ',bmpBody[(y*bmpWidth+x)*3+1],' ',bmpBody[(y*bmpWidth+x)*3]);
+      end;
+   end;
+   close(f);
+end;
 
 begin
 end.
