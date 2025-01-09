@@ -1,59 +1,153 @@
-unit uBVH;
+﻿unit uBVH;
 {$MODE objfpc}{$H+}
 {$INLINE ON}
 {$modeswitch advancedrecords}
 
 interface
-uses uVect;
-
+uses uVect,uScene,Math,Classes;
+const
+  Nil_Leaf=16384;
 type
-   AABBRecord=Record
-      Min,Max:VecRecord;
-      function hit(r:RayRecord;tmin,tmax:real):boolean;
-      function new(m0,m1:VecRecord):AABBRecord;
-   end;
+  IntegerArray=array of integer;
 
+  BVHNode=Class
+    root:AABBRecord;
+    left,right:BVHNode;
+    leaf:integer;
+    constructor Create(ary:IntegerArray;sph:TList);
+    function intersection(r:RayRecord):InterRecord;
+  end;
 
+procedure AABBSort(var a: array of integer);
+procedure AABBSort2(var a: array of integer);
+   
 implementation
 
-function AABBRecord.new(m0,m1:VecRecord):AABBRecord;
+
+function GetAABBVal(suf:integer;axis:integer):real;
 begin
-   min:=m0;max:=m1;
-   result:=self;
+  case axis of
+    1:result:=SphereClass(sph[suf]).BoundBox.min.x;
+    2:result:=SphereClass(sph[suf]).BoundBox.min.y;
+    else begin
+      result:=SphereClass(sph[suf]).BoundBox.min.z;
+    end;
+  end ;(*case*)
+end;
+procedure AABBSort(var a: array of integer);
+var
+   i, j, h,axis: integer;
+   ar:real;
+begin
+   ar:=random;
+   if ar<0.33 then axis:=1 else if ar<0.67 then axis:=2 else axis:=3;
+   for i := 0 to High(a) do begin
+       for j := 1 to High(a) - i  do begin
+           if GetAABBVal(a[j],axis) < GetAABBVal(a[j-1],axis) then begin
+             h:=a[j-1];a[j-1]:=a[j];a[j]:=h;
+         end;
+       end;
+  end;
 end;
 
-function AABBRecord.hit(r:RayRecord;tmin,tmax:real):boolean;
+procedure AABBSort2(var a: array of integer);
 var
-  invD,t0,t1,tswap:real;
+   i, j, h, n,v,axis: integer;
+   ar,v1,v2:real;
 begin
-    invD := 1.0 / r.d.x;
-    t0 := (Min.x - r.o.x) * invD;
-    t1 := (max.x - r.o.x) * invD;
-    if (invD < 0.0) then begin tswap:=t1;t1:=t0;t0:=tswap end;
+   ar:=random;
+   if ar<0.33 then axis:=1 else if ar<0.67 then axis:=2 else axis:=3;
+  n := length(a);
+  h := 1;
+  repeat
+    h := 3*h + 1
+  until h > n;
+  repeat
+    h := h div 3;
+    for i := h to n-1 do begin
+      v := a[i];
+      j := i;
+      while (j >= h) AND (GetAABBVal(a[j-h],axis) > GetAABBVal(a[i],axis)) do begin
+        a[j] := a[j-h];
+        j := j - h;
+      end;
+      a[j] := v;
+    end;(*for*)
+   until h = 1;
+end;
 
-    if t0>tmin then tmin:=t0;
-    if t1<tmax then tmax:=t1;
-    if (tmax <= tmin) then exit(false);
+constructor BVHnode.Create(ary:IntegerArray;sph:TList);
+var
+   upAry,DownAry:IntegerArray;
+   i,len:integer;
+begin
+   (*//debug
+   for i:=0 to High(ary) do begin
+      write('ary[',i,']=',ary[i]);
+   end;
+   writeln;
+   //debug*)
+   root:=sphereclass(sph[ary[0]]).BoundBox;
+   Leaf:=Nil_Leaf;
 
-    invD := 1.0 / r.d.y;
-    t0 := (Min.y - r.o.y) * invD;
-    t1 := (max.y - r.o.y) * invD;
-    if (invD < 0.0) then begin tswap:=t1;t1:=t0;t0:=tswap end;
+  case High(Ary) of
+    0:Leaf:=ary[0];//要素1
+    1:begin
+       Root:=MargeBoundBox(Root,SphereClass(sph[ary[1] ]).BoundBox);
+       setLength(UpAry,1);SetLength(downAry,1);
+       upAry[0]:=Ary[0];DownAry[0]:=Ary[1];
+       Left:=BVHNode.Create(upAry,sph);
+       right:=BVHNode.Create(DownAry,sph);
+    end;
+    else begin
+      AABBSort(ary);
+      for i:=1 to high(ary)  do begin
+        Root:=MargeBoundBox(Root,SphereClass(sph[ary[i] ]).BoundBox);
+      end;
+      len:=length(Ary) div 2;
+      upAry:=Copy(Ary,0,len);
+      DownAry:=Copy(Ary,len,length(Ary)-len);
+       
+      Left:=BVHNode.Create(UpAry,sph);
+      right:=BVHNode.Create(DownAry,sph);
+    end;
+  end;
+end;
 
-    if t0>tmin then tmin:=t0;
-    if t1<tmax then tmax:=t1;
-    if (tmax <= tmin) then exit(false);
-
-    invD := 1.0 / r.d.z;
-    t0 := (Min.z - r.o.z) * invD;
-    t1 := (max.z - r.o.z) * invD;
-    if (invD < 0.0) then begin tswap:=t1;t1:=t0;t0:=tswap end;
-
-    if t0>tmin then tmin:=t0;
-    if t1<tmax then tmax:=t1;
-    if (tmax <= tmin) then exit(false);
-
-    result:=true;
+function BVHnode.intersection(r:RayRecord):InterRecord;
+var
+   RIR,LIR:InterRecord;
+   t:real;
+begin
+  result.isHit:=false;
+  result.t:=INF;
+  result.id:=0;
+  if leaf<>Nil_Leaf then begin
+     result.t:=SphereClass(sph[leaf]).intersect(r);
+     if result.t<INF then begin
+        result.id:=Leaf;
+        result.isHit:=true;
+     end;
+     exit;
+  end;
+  
+  if root.Hit(r,EPS,INF) then begin
+     RIR:=Right.intersection(r);
+     LIR:=Left.intersection(r);
+     if (LIR.isHit or RIR.isHit) then begin
+        if RIR.isHit then result:=RIR;
+        if LIR.isHit then begin
+           if RIR.isHit=false then
+              result:=LIR
+           else if RIR.t>LIR.t then
+              result:=LIR;
+        end;
+     end;
+  end
+  else begin
+    result.isHit:=false;
+    result.t:=INF;
+  end;
 end;
 
 end.
