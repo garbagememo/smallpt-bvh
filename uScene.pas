@@ -33,6 +33,7 @@ type
    
 function MargeBoundBox(box0,box1:AABBRecord):AABBRecord;
 function InitScene:CamRecord;
+function InitNEScene:CamRecord;
 function RandomScene:CamRecord;
 function SkyScene:CamRecord;
 function intersect(const r:RayRecord):InterRecord;
@@ -147,6 +148,27 @@ begin
   sph.add( SphereClass.Create(16.5,p.new(27,16.5,47),        ZeroVec,            c.new(1,1,1)*0.999,   SPEC) );//Mirror
   sph.add( SphereClass.Create(16.5,p.new(73,16.5,88),        ZeroVec,            c.new(1,1,1)*0.999,   REFR) );//Glass
   sph.add( SphereClass.Create(600, p.new(50,681.6-0.27,81.6),e.new(12,12,12),    ZeroVec,              DIFF) );//Ligth
+
+  result.p:=vp.new(50, 52, 295.6);
+  result.d:=vd.new(0, -0.042612, -1.0).norm;
+  result.PlaneDist:=140;
+end;
+
+function InitNEScene:CamRecord;
+var
+   p,c,e:Vec3;
+  vp,vc,vd:Vec3;
+begin
+  sph:=TList.Create;
+  sph.add( SphereClass.Create(1e5, p.new( 1e5+1,40.8,81.6),  ZeroVec,c.new(0.75,0.25,0.25),DIFF) );//Left
+  sph.add( SphereClass.Create(1e5, p.new(-1e5+99,40.8,81.6), ZeroVec,c.new(0.25,0.25,0.75),DIFF) );//Right
+  sph.add( SphereClass.Create(1e5, p.new(50,40.8, 1e5),      ZeroVec,c.new(0.75,0.75,0.75),DIFF) );//Back
+  sph.add( SphereClass.Create(1e5, p.new(50,40.8,-1e5+170+eps),ZeroVec,ZeroVec            ,DIFF) );//Front
+  sph.add( SphereClass.Create(1e5, p.new(50, 1e5, 81.6),     ZeroVec,c.new(0.75,0.75,0.75),DIFF) );//Bottomm
+  sph.add( SphereClass.Create(1e5, p.new(50,-1e5+81.6,81.6), ZeroVec,c.new(0.75,0.75,0.75),DIFF) );//Top
+  sph.add( SphereClass.Create(16.5,p.new(27,16.5,47),        ZeroVec,c.new(1,1,1)*0.999,   SPEC) );//Mirror
+  sph.add( SphereClass.Create(16.5,p.new(73,16.5,88),        ZeroVec,c.new(1,1,1)*0.999,   REFR) );//Glass
+  sph.add( SphereClass.Create( 1.5,p.new(50,81.6-16.5,81.6), e.new(4,4,4)*100,   ZeroVec,  DIFF) );//Ligth
 
   result.p:=vp.new(50, 52, 295.6);
   result.d:=vd.new(0, -0.042612, -1.0).norm;

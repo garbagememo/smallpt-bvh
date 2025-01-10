@@ -15,7 +15,7 @@ type
     left,right:BVHNode;
     leaf:integer;
     constructor Create(ary:IntegerArray;sph:TList);
-    function intersection(r:RayRecord):InterRecord;
+    function intersect(r:RayRecord):InterRecord;
   end;
 
 procedure AABBSort(var a: array of integer);
@@ -84,7 +84,7 @@ begin
   end;
 end;
 
-function BVHnode.intersection(r:RayRecord):InterRecord;
+function BVHnode.intersect(r:RayRecord):InterRecord;
 var
    RIR,LIR:InterRecord;
    t:real;
@@ -102,8 +102,8 @@ begin
   end;
   
   if root.Hit(r,EPS,INF) then begin
-     RIR:=Right.intersection(r);
-     LIR:=Left.intersection(r);
+     RIR:=Right.intersect(r);
+     LIR:=Left.intersect(r);
      if (LIR.isHit or RIR.isHit) then begin
         if RIR.isHit then result:=RIR;
         if LIR.isHit then begin
