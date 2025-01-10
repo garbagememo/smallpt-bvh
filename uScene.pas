@@ -36,6 +36,8 @@ function InitScene:CamRecord;
 function InitNEScene:CamRecord;
 function RandomScene:CamRecord;
 function SkyScene:CamRecord;
+function wadaScene:CamRecord;
+function ForestScene:CamRecord;
 function intersect(const r:RayRecord):InterRecord;
 var
   sph:TList;
@@ -242,10 +244,68 @@ begin
 
   result.p:=vp.new(55, 58, 245.6);
   result.d:=vd.new(0, -0.24, -1.0).norm;
-  result.PlaneDist:=70;
-  //PlaneDist=140だと上手く動かない。これは調査すべき点ですなー。
+  result.PlaneDist:=140;
 end;
 
+function ForestScene:CamRecord;
+var
+   tc,scc,p,e,c:Vec3;
+   vp,vc,vd:Vec3;
+begin
+  sph:=TList.Create;
+
+  tc:=tc.new(0.0588, 0.361, 0.0941);
+  scc:=scc.new(1,1,1)*0.7;
+  sph.add(SphereClass.Create(1e5, p.new(50, 1e5+130, 0),  e.new(1,1,1)*1.3,ZeroVec,DIFF)); //lite
+  sph.add(SphereClass.Create(1e2, p.new(50, -1e2+2, 47),  ZeroVec,c.new(1,1,1)*0.7,DIFF)); //grnd
+
+  sph.add(SphereClass.Create(1e4, p.new(50, -30, 300)+e.new(-sin(50*PI/180), 0, cos(50*PI/180))*1e4, ZeroVec, c.new(1,1,1)*0.99,SPEC));// mirr L
+  sph.add(SphereClass.Create(1e4, p.new(50, -30, 300)+e.new(sin(50*PI/180),  0, cos(50*PI/180))*1e4, ZeroVec, c.new(1,1,1)*0.99,SPEC));// mirr R
+  sph.add(SphereClass.Create(1e4, p.new(50, -30, -50)+e.new(-sin(30*PI/180), 0,-cos(30*PI/180))*1e4, ZeroVec, c.new(1,1,1)*0.99,SPEC));// mirr FL
+  sph.add(SphereClass.Create(1e4, p.new(50, -30, -50)+e.new(sin(30*PI/180),  0,-cos(30*PI/180))*1e4, ZeroVec, c.new(1,1,1)*0.99,SPEC));// mirr
+
+
+  sph.add(SphereClass.Create(4, p.new(50,6*0.6,47),                         ZeroVec, c.new(0.13,0.066,0.033), DIFF));//"tree"
+  sph.add(SphereClass.Create(16,p.new(50,6*2+16*0.6,47),                    ZeroVec, tc,  DIFF));//"tree"
+  sph.add(SphereClass.Create(11,p.new(50,6*2+16*0.6*2+11*0.6,47),           ZeroVec, tc,  DIFF));//"tree"
+  sph.add(SphereClass.Create(7, p.new(50,6*2+16*0.6*2+11*0.6*2+7*0.6,47),   ZeroVec, tc,  DIFF));//"tree"
+
+  sph.add(SphereClass.Create(15.5,p.new(50,1.8+6*2+16*0.6,47),              ZeroVec, scc,  DIFF));//"tree"
+  sph.add(SphereClass.Create(10.5,p.new(50,1.8+6*2+16*0.6*2+11*0.6,47),     ZeroVec, scc,  DIFF));//"tree"
+  sph.add(SphereClass.Create(6.5, p.new(50,1.8+6*2+16*0.6*2+11*0.6*2+7*0.6,47), ZeroVec, scc,  DIFF));//"tree"
+
+  result.p:=vp.new(55, 58, 245.6);
+  result.d:=vd.new(0, -0.24, -1.0).norm;
+  result.PlaneDist:=140;
+end;
+
+function wadaScene:CamRecord;
+var
+   R,T,D,Z:real;
+   p,c,e:Vec3;
+   vp,vc,vd:Vec3;
+begin
+  sph:=TList.Create;
+
+  R:=60;
+  //double R=120;
+  T:=30*PI/180.;
+  D:=R/cos(T);
+  Z:=60;
+
+  sph.add(SphereClass.Create(1e5, p.new(50, 100, 0),      e.new(1,1,1)*3e0, ZeroVec           , DIFF)); // sky
+  sph.add(SphereClass.Create(1e5, p.new(50, -1e5-D-R, 0), ZeroVec,          c.new(0.1,0.1,0.1),DIFF));           //grnd
+
+  sph.add(SphereClass.Create(R, p.new(50,40.8,62)+e.new( cos(T),sin(T),0)*D, ZeroVec, c.new(1,0.3,0.3)*0.999, SPEC)); //red
+  sph.add(SphereClass.Create(R, p.new(50,40.8,62)+e.new(-cos(T),sin(T),0)*D, ZeroVec, c.new(0.3,1,0.3)*0.999, SPEC)); //grn
+  sph.add(SphereClass.Create(R, p.new(50,40.8,62)+e.new(0,-1,0)*D,           ZeroVec, c.new(0.3,0.3,1)*0.999, SPEC)); //blue
+  sph.add(SphereClass.Create(R, p.new(50,40.8,62)+e.new(0,0,-1)*D,           ZeroVec, c.new(0.53,0.53,0.53)*0.999, SPEC)); //back
+  sph.add(SphereClass.Create(R, p.new(50,40.8,62)+e.new(0,0,1)*D,            ZeroVec, c.new(1,1,1)*0.999, REFR)); //front
+
+  result.p:=vp.new(55, 58, 245.6);
+  result.d:=vd.new(0, -0.24, -1.0).norm;
+  result.PlaneDist:=70;
+end;
 
 function intersect(const r:RayRecord):InterRecord;
 var 
