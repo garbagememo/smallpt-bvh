@@ -131,6 +131,7 @@ begin
          writeln(' -o [finename] output filename');
          writeln(' -s [samps] sampling count');
          writeln(' -w [width] screen width pixel');
+         halt;
       end;
     end; { case }
   until c=endofoptions;
@@ -139,9 +140,11 @@ begin
   writeln('BMP=OK');
 
   Randomize;
-  cam:=wadaScene;
-  writeln('Set Scene'); 
-  
+  cam:=RandomScene;
+  writeln('Set Scene');
+  writeln('samples=',samps);
+  writeln('Wide x High=',w,' x ',h);
+
   SetLength(a,sph.count);
   for i:=0 to sph.count-1 do a[i]:=i;
   BVH:=BVHNodeClass.Create(a,sph);
@@ -195,9 +198,9 @@ begin
         end;(*sx*)
       end;(*sy*)
       vColor:=ColToRGB(tColor);
-      BMP.SetPixel(x,height-y,vColor);
+      BMP.SetPixel(x,height-y-1,vColor);
     end;(* for x *)
   end;(*for y*)
   writeln ('The time is : ',TimeToStr(Time));
-  BMP.WritePPM(FN);
+  if UpperCase(ExtractFileExt(FN))='.BMP' then  BMP.WriteBMPFile(FN) else BMP.WritePPM(FN);
 end.

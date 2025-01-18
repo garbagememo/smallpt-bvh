@@ -35,7 +35,7 @@ begin
    cmap_entries := 0;
    headersize:=14+40;
    bfsize:=headersize+longint(x*y)*3;
-   bmpBodySize:=bfSize;
+   bmpBodySize:=LongInt(x*y*3);
    for i:=0 to 14-1 do bmpfileheader[i]:=0;
    for i:=0 to 40-1 do bmpinfoheader[i]:=0;
 
@@ -80,6 +80,12 @@ begin
   { we leave biSizeImage = 0; this is correct for uncompressed data }
   { we leave biClrImportant := 0 }
 
+         //Debug line
+   for i:=0 to BMPWidth do begin
+         bmpBody[i*3+0]:=128;
+         bmpBody[i*3+1]:=64;
+         bmpBOdy[i*3+2]:=255;
+   end;             
 end;
 
 procedure BMPRecord.SetPixel(x,y:integer;col:rgbColor);
@@ -87,7 +93,6 @@ begin
    bmpBody[(y*BMPWidth+x)*3  ]:=col.b;
    bmpBody[(y*BMPWidth+x)*3+1]:=col.g;
    bmpBody[(y*BMPWidth+x)*3+2]:=col.r;
-
 end;
 
 procedure BMPRecord.WriteBMPFile(FN:string);

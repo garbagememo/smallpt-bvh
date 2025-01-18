@@ -266,6 +266,7 @@ begin
          writeln(' -o [finename] output filename');
          writeln(' -s [samps] sampling count');
          writeln(' -w [width] screen width pixel');
+         halt;
       end;
     end; { case }
   until c=endofoptions;
@@ -278,6 +279,7 @@ begin
 
   writeln('Set Scene'); 
   writeln('Sample=',samps);
+  writeln('Wide x High=',w,' x ',h);
   SetLength(a,sph.count);
   for i:=0 to sph.count-1 do a[i]:=i;
   BVH:=BVHNodeClass.Create(a,sph);
@@ -335,5 +337,6 @@ begin
     end;(* for x *)
   end;(*for y*)
   writeln ('The time is : ',TimeToStr(Time));
-  BMP.WritePPM(FN);
+  if UpperCase(ExtractFileExt(FN))='.BMP' then  BMP.WriteBMPFile(FN) else BMP.WritePPM(FN);
+
 end.
