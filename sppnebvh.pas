@@ -11,7 +11,7 @@ const
   M_1_PI=1/PI;
 
 var
-  BVH:BVHNode;
+  BVH:BVHNodeClass;
 function radiance(const r:RayRecord;depth:integer):Vec3;
 var
   id:integer;
@@ -95,12 +95,12 @@ var
   i,tid:integer;
   obj,s:SphereClass;
   x,n,f,nl,u,v,w,d:Vec3;
-  p,r1,r2,r2s,m1,ss,cc:real;
+  p,r1,r2,r2s,ss,cc:real;
   into:boolean;
   Ray2,RefRay:RayRecord;
   nc,nt,nnt,ddn,cos2t,q,a,b,c,R0,Re,RP,Tr,TP:real;
   tDir:Vec3;
-  EL,sw,su,sv,l,tw,tu,tv:Vec3;
+  EL,sw,su,sv,l:Vec3;
   cos_a_max,eps1,eps2,eps2s,cos_a,sin_a,phi,omega:real;
   cl,cf:Vec3;
   tir,ir:InterRecord;
@@ -159,8 +159,7 @@ begin
             (*半球内部なら乱反射した寄与全てを取ればよい・・はず*)
             eps1:=M_2PI*random;eps2:=random;eps2s:=sqrt(eps2);
             sincos(eps1,ss,cc);
-            tu:=u*(cc*eps2s);tu:=tu+v*(ss*eps2s);tu:=tu+w*sqrt(1-eps2);
-            l:=tu.norm;
+            l:=(u*(cc*eps2s)+v*(ss*eps2s)+w*sqrt(1-eps2)).norm;
             tir:=BVH.intersect(Ray2.new(x,l));
              if tir.isHit then begin
                 if tir.id=i then begin
@@ -275,12 +274,13 @@ begin
   writeln('BMP=OK');
 
   Randomize;
-  cam:=initNEScene;
+  cam:=wadaScene;
+
   writeln('Set Scene'); 
   writeln('Sample=',samps);
   SetLength(a,sph.count);
   for i:=0 to sph.count-1 do a[i]:=i;
-  BVH:=BVHNode.Create(a,sph);
+  BVH:=BVHNodeClass.Create(a,sph);
 
   cx.new(w * 0.5135 / h, 0, 0);
   cy:= (cx/ cam.d).norm;
@@ -318,8 +318,6 @@ begin
             d:= cx* (((sx + 0.5 + dx) / 2 + x) / w - 0.5)
                +cy* (((sy + 0.5 + dy) / 2 + (h - y - 1)) / h - 0.5);
             d:= (d +cam.d).norm;
-
-   
    //         tempRay.o:= d* 140+cam.o;
             tempRay.d := d;
             tempRay.o := d*cam.PlaneDist+cam.p;

@@ -302,9 +302,9 @@ begin
   sph.add(SphereClass.Create(R, p.new(50,40.8,62)+e.new(0,0,-1)*D,           ZeroVec, c.new(0.53,0.53,0.53)*0.999, SPEC)); //back
   sph.add(SphereClass.Create(R, p.new(50,40.8,62)+e.new(0,0,1)*D,            ZeroVec, c.new(1,1,1)*0.999, REFR)); //front
 
-  result.p:=vp.new(55, 58, 245.6);
-  result.d:=vd.new(0, -0.24, -1.0).norm;
-  result.PlaneDist:=70;
+  result.p:=vp.new(50, 52, 295.6);
+  result.d:=vd.new(0, -0.042612, -1.0).norm;
+  result.PlaneDist:=140;
 end;
 
 function intersect(const r:RayRecord):InterRecord;

@@ -10,9 +10,9 @@ const
 type
   IntegerArray=array of integer;
 
-  BVHNode=Class
+  BVHNodeClass=Class
     root:AABBRecord;
-    left,right:BVHNode;
+    left,right:BVHNodeClass;
     leaf:integer;
     constructor Create(ary:IntegerArray;sph:TList);
     function intersect(r:RayRecord):InterRecord;
@@ -50,7 +50,7 @@ begin
   end;
 end;
 
-constructor BVHnode.Create(ary:IntegerArray;sph:TList);
+constructor BVHnodeClass.Create(ary:IntegerArray;sph:TList);
 var
    upAry,DownAry:IntegerArray;
    i,len:integer;
@@ -67,8 +67,8 @@ begin
        SetLength(downAry,1);
        upAry[0]:=Ary[0];
        DownAry[0]:=Ary[1];
-       Left:=BVHNode.Create(upAry,sph);
-       right:=BVHNode.Create(DownAry,sph);
+       Left:=BVHNodeClass.Create(upAry,sph);
+       right:=BVHNodeClass.Create(DownAry,sph);
     end;
     else begin
       for i:=1 to high(ary)  do begin
@@ -78,13 +78,13 @@ begin
       upAry:=Copy(Ary,0,len);
       DownAry:=Copy(Ary,len,length(Ary)-len);
        
-      Left:=BVHNode.Create(UpAry,sph);
-      right:=BVHNode.Create(DownAry,sph);
+      Left:=BVHNodeClass.Create(UpAry,sph);
+      right:=BVHNodeClass.Create(DownAry,sph);
     end;
   end;
 end;
 
-function BVHnode.intersect(r:RayRecord):InterRecord;
+function BVHnodeClass.intersect(r:RayRecord):InterRecord;
 var
    RIR,LIR:InterRecord;
    t:real;

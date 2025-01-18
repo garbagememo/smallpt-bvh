@@ -6,7 +6,7 @@ program smallpt;
 uses SysUtils,Classes,Math,uVect,uScene,uBMP,uBVH,getopts;
 
 var
-  BVH:BVHNode;
+  BVH:BVHNodeClass;
 
 function radiance(const r:RayRecord;depth:integer):Vec3;
 var
@@ -97,14 +97,13 @@ var
   tColor,r,camPosition,camDirection : Vec3;
 
   BMP:BMPRecord;
-  ScrWidth,ScrHeight:integer;
+
   vColor:rgbColor;
   ArgInt:integer;
   FN,ArgFN:string;
   c:char;
   a:IntegerArray;
-  //debug
-  sp:SphereClass;
+
 begin
   FN:='temp.ppm';
   w:=1024 ;h:=768;  samps := 16;
@@ -140,19 +139,17 @@ begin
   writeln('BMP=OK');
 
   Randomize;
-  cam:=RandomScene;
+  cam:=wadaScene;
   writeln('Set Scene'); 
   
   SetLength(a,sph.count);
   for i:=0 to sph.count-1 do a[i]:=i;
-  BVH:=BVHNode.Create(a,sph);
+  BVH:=BVHNodeClass.Create(a,sph);
 
   cx.new(w * 0.5135 / h, 0, 0);
   cy:= (cx/ cam.d).norm;
   cy:= cy* 0.5135;
 
-  ScrWidth:=0;
-  ScrHeight:=0;
   writeln ('The time is : ',TimeToStr(Time));
 (*
   cam.p:=vp.new(55, 58, 245.6);
