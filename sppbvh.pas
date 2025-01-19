@@ -88,7 +88,7 @@ end;
 
 var
   x,y,sx,sy,i,s: integer;
-  w,h,samps,height    : integer;
+  w,h,samps,modelnum    : integer;
   temp,d       : Vec3;
   r1,r2,dx,dy  : real;
   tempRay  : RayRecord;
@@ -106,12 +106,16 @@ var
 
 begin
   FN:='temp.ppm';
-  w:=1024 ;h:=768;  samps := 16;
-  c:=#0;
+  w:=640 ;h:=480;  samps := 16;
+  c:=#0;modelnum:=0;
   repeat
-    c:=getopt('o:s:w:');
+    c:=getopt('m:o:s:w:');
 
     case c of
+      'm' : begin
+         ArgInt:=StrToInt(OptArg);
+         if modelnum<6 then modelnum:=ArgInt;     
+      end;
       'o' : begin
          ArgFN:=OptArg;
          if ArgFN<>'' then FN:=ArgFN;
@@ -128,6 +132,7 @@ begin
          writeln('w=',w,' ,h=',h);
       end;
       '?',':' : begin
+         writeln(' -m [1..5] scene model ');
          writeln(' -o [finename] output filename');
          writeln(' -s [samps] sampling count');
          writeln(' -w [width] screen width pixel');
@@ -135,12 +140,25 @@ begin
       end;
     end; { case }
   until c=endofoptions;
-  height:=h;
+
   BMP.new(w,h);
   writeln('BMP=OK');
 
   Randomize;
-  cam:=RandomScene;
+  case modelnum of
+     5:begin
+          cam:=RandomScene;
+       end;
+     4:cam:=WadaScene;
+     3:cam:=ForestScene;
+     2:cam:=SkyScene;
+     1:cam:=InitNEScene;
+     else begin
+        cam:=InitScene;
+     end;
+  end;(*case*)
+
+  writeln('Model Number=',modelnum);
   writeln('Set Scene');
   writeln('samples=',samps);
   writeln('Wide x High=',w,' x ',h);
@@ -198,7 +216,7 @@ begin
         end;(*sx*)
       end;(*sy*)
       vColor:=ColToRGB(tColor);
-      BMP.SetPixel(x,height-y-1,vColor);
+      BMP.SetPixel(x,h-y-1,vColor);
     end;(* for x *)
   end;(*for y*)
   writeln ('The time is : ',TimeToStr(Time));
